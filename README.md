@@ -1,2 +1,2 @@
 # searchadapter
-Description of an algrithm to merge multiple paged searches using custom unsupported filters into one paged and filtered search.
+An algorithm to merge multiple paged searches into one paged and filtered search using custom unsupported filters.
