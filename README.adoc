@@ -131,7 +131,7 @@ image::images/MergeResponsesKomplexSolution2.svg[]
 
 *Schritt 3*
 
-Es wird die nächste Seite von A (Page 1) geladen. Es gibt noch einen Wert (die "3"), die in die Ergebnisliste
+Es wird die nächste Seite von A (Page 2) geladen. Es gibt noch einen Wert (die "3"), die in die Ergebnisliste
 übernommen werden kann, dann ist sie gefüllt. Es kann aber sein, dass in B noch Werte vorhanden sind,
 die zwischen "3" und "6" einsortiert werden müssen.
 
@@ -141,7 +141,7 @@ image::images/MergeResponsesKomplexSolution3.svg[]
 
 *Schritt 4*
 
-Es wird die nächste Seite von B (Page 1) geladen. Hier gibt es tatsächlich noch einen Wert "4", der in
+Es wird die nächste Seite von B (Page 2) geladen. Hier gibt es tatsächlich noch einen Wert "4", der in
 in die Ergebnisliste übernommen werden muss. Die "6" wird in die nächste Seite verschoben (diese kann für später
 gepuffert werden).
 
