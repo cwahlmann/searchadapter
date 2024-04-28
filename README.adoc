@@ -43,6 +43,7 @@ Ergebnisseite zu füllen.
 .Paging mit Filter
 image::images/PagingWithFilter.svg[]
 
++
 Um doppelte Abfragen auf die Quelldaten zu vermeiden, sollten diese mit einem Cache versehen werden.
 (Im Beispiel <<custom-filters-image01>> muss für zwei verschiedene Ergebnisseiten auf Page 2 zugegriffen werden.)
 
