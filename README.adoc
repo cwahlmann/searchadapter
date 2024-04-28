@@ -171,8 +171,8 @@ der auf das nächste zu verwendene Element verweist.
 
 1. für jede Methode `M~i~ | i = 1 ... n`, die noch Daten bereitstellen kann:
 .. Lese die Daten und sortiere sie in der Ergebnisseite ein.
-.. Wird ein Datum aus `M~j~` in die nächste Ergebnisseite verschoben: aktualisiere `Index~j~`, sodass
-   er auf dieses Datum zeigt.
+.. Wird ein Element aus `M~j~` in die nächste Ergebnisseite verschoben: aktualisiere `Index~j~`, sodass
+   er auf dieses Element zeigt.
 .. Aktualisiere `Index~i~`.
 2. Prüfe, ob mindestens eine Methode `M~x~` potenziell weitere Daten zur Ergebnisseite beisteuern kann.
 .. Das ist der Fall, wenn die Daten der aktuell geladenen Seite von `M~x~` vollständig verarbeitet wurden,
