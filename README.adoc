@@ -1,4 +1,5 @@
 = Search Adapter
+:figure-caption: Abbildung
 :toc:
 :toc-title:
 
@@ -35,21 +36,22 @@ Aufrufe gemacht und die Ergebnisse zusammengeführt werden.
 
 Wenn Daten über die Möglichkeiten einer API hinaus gefiltert werden sollen,
 ist eine 1:1-Zuordnung von abgerufenen Seiten und Seiten der Ergebnisliste
-nicht mehr möglich. Es müssen u.U. weitere Daten nachgeladen weren, um eine
+nicht mehr möglich. Es müssen u.U. weitere Daten nachgeladen werden, um eine
 Ergebnisseite zu füllen.
 
+[[custom-filters-image01]]
+.Paging mit Filter
 image::images/PagingWithFilter.svg[]
 
-Damit zum Laden einer bestimmten Seite nicht alle vorherigen Seiten aus dem Backend
-nachgeladen werden müssen, sollten die vom Adapter erzeugten Seiten gecached werden.
+Um doppelte Abfragen auf die Quelldaten zu vermeiden, sollten diese mit einem Cache versehen werden.
+(Im Beispiel <<custom-filters-image01>> muss für zwei verschiedene Ergebnisseiten auf Page 2 zugegriffen werden.)
 
-* Die Vorhaltedauer und Größe des Caches muss abhängig von der konkreten Anwendung gewählt werden.
-* Sollte eine Seite nicht mehr im Cache liegen, müssen ausgehend von der letzten
-vorherigen Seite im Cache alle Inhalte erneut geladen werden. Deswegen darf der Cache nicht zu klein gewählt werden.
-* Mit einem zweiten, parallel gepflegten Cache, welcher Seite und Index der Ausgangsdaten
-einer Seite enthält, können deutlich mehr Seiten im Speicher gehalten
-und damit das Nachladen von Daten wesentlich reduziert werden.
+Damit die Quelldaten nicht immer von Anfang an durchlaufen werden müssen, ist ein zusätzlicher zweiter Cache
+für die Ergebnisseiten nötig. Wenn nur Indizes auf die Quelldaten im Cache liegen, kann dieser sehr groß gewählt
+und damit die Zugriffszeit auf die richtige Quellseite erheblich reduziert werden.
 
+[[custom-filters-image02]]
+.Paging mit Filter - Nutzen eines Caches
 image::images/PagingWithFilterAndCache.svg[]
 
 [[scrollid-to-pagenumber]]
@@ -58,6 +60,8 @@ image::images/PagingWithFilterAndCache.svg[]
 Stellt die Backend-API das Laden einer Seite lediglich iterativ mithilfe einer Scroll-ID zur Verfügung,
 so kann nicht frei auf eine bestimmte Seite zugegriffen werden. Es müssen also für das Laden einer Seite n alle vorherigen Seiten abgerufen werden.
 
+[[scrollid-to-pagenumber-image03]]
+.Mapping von ScrollId zu Seitennummer
 image::images/ScrollIdToPaging.svg[]
 
 Um den Zugriff zu beschleunigen, kann auch hier mit einem Cache gearbeitet werden.
@@ -67,44 +71,119 @@ Cache für die Zuordnung von Seitennummer zu Scroll-ID an.
 Werden beim Caching die Suchparameter berücksichtigt, lässt sich das Laden von Daten
 auch bei einer Änderung der Suche beschleunigen.
 
+[[scrollid-to-pagenumber-image04]]
+.Mapping von ScrollId zu Seitennummer - Nutzen von 2 Caches
 image::images/ScrollIdToPagingWithCache.svg[]
 
-Damit lässt sich die Lösung für nicht unterstützte Filter aus <<custom-filters>> auch auf APIs basierend auf
+Damit lässt sich die Lösung im Kapitel <<custom-filters>> auch auf APIs basierend auf
 Scroll-IDs übertragen.
 
 [[merge-responses]]
-== Ergebnisser mehrerer Suchen
+== Ergebnisse mehrerer Suchen
 
 Mangels geeigneter Suchkriterien kann es nötig sein, Ergebnisse aus mehreren Suchanfragen zusammenzuführen.
 
 Bei gleicher Seitengröße, jeweiliger Unterstützung der benötigten Sortierung und Filter und disjunkter Ergebnismenge
 ist dies leicht zu bewerkstelligen. Die Ergebnisse der Einzelsuchen werden zu einer Liste mit doppelter Länge zusammensortiert.
 
-image:../images/MergeResponsesSimple.svg[]
+[[merge-responses-image05]]
+.Simples Mergen ohne nachträgliches Filtern
+image::images/MergeResponsesSimple.svg[]
 
-Dieser einfache Fall stellt leider einen Idealfall dar. In der Regel müssen wir mit Teilergebnissen mit variabler Länge arbeiten.
+Dieser einfache Fall stellt leider einen Idealfall dar. In der Regel muss mit Einzelergebnissen mit variabler Länge gearbeitet werden.
 
-image:../images/MergeResponsesKomplex.svg[]
+[[merge-responses-image06]]
+.Mergen bei variablen Seitenlängen
+image::images/MergeResponsesKomplex.svg[]
 
-Mit den Mitteln aus <<custom-filters>> und <<scrollid-to-pagenumber>> haben wir jedoch schon gute Werkzeuge an der Hand,
-die - erweitert um etwas Logik - auch dieses Problem lösen.
+Mit den Mitteln aus den Kapiteln <<custom-filters>> und <<scrollid-to-pagenumber>> haben wir jedoch schon gute
+Werkzeuge an der Hand, die - erweitert um etwas Logik - auch dieses Problem lösen.
+
+Angenommen, wir haben in einer API zwei Suchmethoden, die beide benötigt werden, um eine Liste mit Ergebnissen
+zu liefern. Beide Methoden unterstützen dieselbe Sortierung (hier aufsteigend numerisch), und beide bieten ein
+Paging an. Bei Methode A hat eine Seite 4 Einträge, bei B sind es 3. Die Ergebnisliste soll seitenweise geliefert
+werden können, mit einer Seitengröße von 4.
+
+Um diese Liste zu füllen, müssen nach und nach Daten von A und B nachgeladen und einsortiert werden, bis eine Seite
+vollständig ist. Die Herausforderung besteht darin, zu wissen, _wann_ sie vollständig ist.
+
+In der Abbildung <<merge-responses-image06>> ist zu sehen, dass der Wert "3" erst mit Seite 2 von B geladen werden kann,
+im Ergebnis jedoch mit zu Seite 1 gehört.
+
+Gehen wir das einmal schrittweise durch:
 
 *Schritt 1*
 
-image:images/MergeResponsesKomplexSolution1.svg[]
+Von A wird die erste Seite gelesen und gefiltert. Die angeforderte Seite ist damit noch nicht gefüllt.
+
+[[merge-responses-image07]]
+.Ergebnisliste mit ersten Daten aus A füllen
+image::images/MergeResponsesKomplexSolution1.svg[]
 
 *Schritt 2*
 
-image:images/MergeResponsesKomplexSolution2.svg[]
+Also wird die erste Seite mit Daten von B gelesen. Die gefilterten Daten werden zu den bisherigen
+Ergebnissen sortiert. In der Ergebnisliste fehlt noch immer ein Eintrag.
+
+[[merge-responses-image08]]
+.Daten aus B hinzu sortieren
+image::images/MergeResponsesKomplexSolution2.svg[]
 
 *Schritt 3*
 
-image:images/MergeResponsesKomplexSolution3.svg[]
+Es wird die nächste Seite von A (Page 1) geladen. Es gibt noch einen Wert (die "3"), die in die Ergebnisliste
+übernommen werden kann, dann ist sie gefüllt. Es kann aber sein, dass in B noch Werte vorhanden sind,
+die zwischen "3" und "6" einsortiert werden müssen.
+
+[[merge-responses-image09]]
+.Weitere Daten aus A hinzu sortieren
+image::images/MergeResponsesKomplexSolution3.svg[]
 
 *Schritt 4*
 
-image:images/MergeResponsesKomplexSolution4.svg[]
+Es wird die nächste Seite von B (Page 1) geladen. Hier gibt es tatsächlich noch einen Wert "4", der in
+in die Ergebnisliste übernommen werden muss. Die "6" wird in die nächste Seite verschoben (diese kann für später
+gepuffert werden).
+
+[[merge-responses-image10]]
+.Weitere Daten aus B hinzu sortieren
+image::images/MergeResponsesKomplexSolution4.svg[]
 
 *Schritt 5*
 
-image:images/MergeResponsesKomplexSolution5.svg[]
+Jetzt wird geprüft, ob es in A (die bereits geladene aber noch nicht vollständig übernommene Page 1) oder
+in B (die nächste Page 2) noch Daten gibt, die kleiner als der letzte Eintrag ("4") der Ergebnisliste sind.
+Das ist nicht der Fall, damit kann das Ergebnis (Page 1) abgeliefert werden.
+
+[[merge-responses-image11]]
+.Prüfen, ob weitere releante Daten vorhanden sind
+image::images/MergeResponsesKomplexSolution5.svg[]
+
+*Daraus eribt sich dieser Algorithmus:*
+
+Gegeben sind `n` Input-Methoden `M~1~ ... M~n~` mit jeweils einem `Index~n~` mit `(_Page#_, _Item#_)`,
+der auf das nächste zu verwendene Element verweist.
+
+1. für jede Methode `M~i~ | i = 1 ... n`, die noch Daten bereitstellen kann:
+.. Lese die Daten und sortiere sie in der Ergebnisseite ein.
+.. Aktualisiere `Index~i~`.
+2. Prüfe, ob mindestens eine Methode `M~x~` potenziell weitere Daten zur Ergebnisseite beisteuern kann.
+.. Das ist der Fall, wenn die Daten der aktuell geladenen Seite von `M~x~` vollständig verarbeitet wurden,
+   d.h. `Index~x~` verweist auf das erste Element der folgenden Seite
+3. Wenn ja, mache bei 1. weiter.
+
+*Caching*
+
+Für einen performanten Zugriff auf eine bestimmte Ergebnisseite können die Caching-Mechanismen der vorherigen Kapitel
+angewandt werden.
+
+Es sollte einen Cache für die Quelldaten und einen Cache mit Informationen zu den Ergebnisseiten geben.
+Letzterer speichert zu jeder Ergebnisseite allerdings nun alle Indexe `Index~1...n~` der Quellmethoden `M~1...n~`.
+
+[[merge-responses-image12]]
+.Zusammenführen mehrerer Quellen mit Caches
+image::images/MergeResponsesKomplexSolutionWithCache.svg[]
+
+Um eine bestimmte Seite abzurufen, reicht es, die Quelldaten ab den Indexen der letzten im Cache gespeicherten Seite
+zu durchlaufen. Dabei kann der Cache um die fehlenden Seiteninfos aufgefüllt werden, sodass auch auf diese direkt zugegriffen
+werden kann.
