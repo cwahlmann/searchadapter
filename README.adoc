@@ -171,10 +171,12 @@ der auf das nächste zu verwendene Element verweist.
 
 1. für jede Methode `M~i~ | i = 1 ... n`, die noch Daten bereitstellen kann:
 .. Lese die Daten und sortiere sie in der Ergebnisseite ein.
+.. Wird ein Datum aus `M~j~` in die nächste Ergebnisseite verschoben: aktualisiere `Index~j~`, sodass
+   er auf dieses Datum zeigt.
 .. Aktualisiere `Index~i~`.
 2. Prüfe, ob mindestens eine Methode `M~x~` potenziell weitere Daten zur Ergebnisseite beisteuern kann.
 .. Das ist der Fall, wenn die Daten der aktuell geladenen Seite von `M~x~` vollständig verarbeitet wurden,
-   d.h. `Index~x~` verweist auf das erste Element der folgenden Seite
+   d.h. `Index~x~` verweist auf das erste Element der folgenden Seite, und mind. 1 weitere Seite zur Verfügung steht.
 3. Wenn ja, mache bei 1. weiter.
 
 === Caching
