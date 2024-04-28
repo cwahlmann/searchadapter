@@ -131,9 +131,9 @@ image::images/MergeResponsesKomplexSolution2.svg[]
 
 *Schritt 3*
 
-Es wird die nächste Seite von A (Page 2) geladen. Es gibt noch einen Wert (die "3"), die in die Ergebnisliste
+Es wird die nächste Seite von A (Page 2) geladen. Es gibt noch einen Wert (die "7"), die in die Ergebnisliste
 übernommen werden kann, dann ist sie gefüllt. Es kann aber sein, dass in B noch Werte vorhanden sind,
-die zwischen "3" und "6" einsortiert werden müssen.
+die zwischen "2" und "6" einsortiert werden müssen.
 
 [[merge-responses-image09]]
 .Weitere Daten aus A hinzu sortieren
@@ -141,9 +141,9 @@ image::images/MergeResponsesKomplexSolution3.svg[]
 
 *Schritt 4*
 
-Es wird die nächste Seite von B (Page 2) geladen. Hier gibt es tatsächlich noch einen Wert "4", der in
-in die Ergebnisliste übernommen werden muss. Die "6" wird in die nächste Seite verschoben (diese kann für später
-gepuffert werden).
+Es wird die nächste Seite von B (Page 2) geladen. Hier gibt es tatsächlich noch die Werte "3" und "4", die
+in die Ergebnisliste übernommen werden müssen. "6" und "7" werden in die nächste Seite verschoben
+(diese kann für später gepuffert werden).
 
 [[merge-responses-image10]]
 .Weitere Daten aus B hinzu sortieren
@@ -151,8 +151,8 @@ image::images/MergeResponsesKomplexSolution4.svg[]
 
 *Schritt 5*
 
-Jetzt wird geprüft, ob es in A (die bereits geladene aber noch nicht vollständig übernommene Page 1) oder
-in B (die nächste Page 2) noch Daten gibt, die kleiner als der letzte Eintrag ("4") der Ergebnisliste sind.
+Jetzt wird geprüft, ob es in A (die bereits geladene aber noch nicht vollständig übernommene Page 2) oder
+in B (die nächste Page 3) noch Daten gibt, die kleiner als der letzte Eintrag ("4") der Ergebnisliste sind.
 Das ist nicht der Fall, damit kann das Ergebnis (Page 1) abgeliefert werden.
 
 [[merge-responses-image11]]
@@ -185,5 +185,5 @@ Letzterer speichert zu jeder Ergebnisseite allerdings nun alle Indexe `Index~1..
 image::images/MergeResponsesKomplexSolutionWithCache.svg[]
 
 Um eine bestimmte Seite abzurufen, reicht es, die Quelldaten ab den Indexen der letzten im Cache gespeicherten Seite
-zu durchlaufen. Dabei kann der Cache um die fehlenden Seiteninfos aufgefüllt werden, sodass auch auf diese direkt zugegriffen
-werden kann.
+zu durchlaufen. Dabei kann der Cache um die fehlenden Seiteninfos aufgefüllt werden, sodass auch auf diese zukünftig
+direkt zugegriffen werden kann.
