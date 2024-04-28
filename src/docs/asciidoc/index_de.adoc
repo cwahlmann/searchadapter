@@ -1,0 +1,13 @@
+:imagesdir: /images
+
+= Search Adapter
+:toc:
+:toc-title:
+
+include::de/01-introduction.adoc[]
+
+include::de/02-custom-filters.adoc[]
+
+include::de/03-scrollids-to-numbered-pages.adoc[]
+
+include::de/04-merge-responses.adoc[]

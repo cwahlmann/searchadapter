@@ -1,0 +1,36 @@
+[[merge-responses]]
+== Ergebnisser mehrerer Suchen
+
+Mangels geeigneter Suchkriterien kann es nötig sein, Ergebnisse aus mehreren Suchanfragen zusammenzuführen.
+
+Bei gleicher Seitengröße, jeweiliger Unterstützung der benötigten Sortierung und Filter und disjunkter Ergebnismenge
+ist dies leicht zu bewerkstelligen. Die Ergebnisse der Einzelsuchen werden zu einer Liste mit doppelter Länge zusammensortiert.
+
+image:../images/MergeResponsesSimple.svg[]
+
+Dieser einfache Fall stellt leider einen Idealfall dar. In der Regel müssen wir mit Teilergebnissen mit variabler Länge arbeiten.
+
+image:../images/MergeResponsesKomplex.svg[]
+
+Mit den Mitteln aus <<custom-filters>> und <<scrollid-to-pagenumber>> haben wir jedoch schon gute Werkzeuge an der Hand,
+die - erweitert um etwas Logik - auch dieses Problem lösen.
+
+*Schritt 1*
+
+image:../images/MergeResponsesKomplexSolution1.svg[]
+
+*Schritt 2*
+
+image:../images/MergeResponsesKomplexSolution2.svg[]
+
+*Schritt 3*
+
+image:../images/MergeResponsesKomplexSolution3.svg[]
+
+*Schritt 4*
+
+image:../images/MergeResponsesKomplexSolution4.svg[]
+
+*Schritt 5*
+
+image:../images/MergeResponsesKomplexSolution5.svg[]
