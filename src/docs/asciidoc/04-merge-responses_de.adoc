@@ -17,20 +17,20 @@ die - erweitert um etwas Logik - auch dieses Problem lösen.
 
 *Schritt 1*
 
-image:../images/MergeResponsesKomplexSolution1.svg[]
+image:images/MergeResponsesKomplexSolution1.svg[]
 
 *Schritt 2*
 
-image:../images/MergeResponsesKomplexSolution2.svg[]
+image:images/MergeResponsesKomplexSolution2.svg[]
 
 *Schritt 3*
 
-image:../images/MergeResponsesKomplexSolution3.svg[]
+image:images/MergeResponsesKomplexSolution3.svg[]
 
 *Schritt 4*
 
-image:../images/MergeResponsesKomplexSolution4.svg[]
+image:images/MergeResponsesKomplexSolution4.svg[]
 
 *Schritt 5*
 
-image:../images/MergeResponsesKomplexSolution5.svg[]
+image:images/MergeResponsesKomplexSolution5.svg[]

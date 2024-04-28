@@ -67,7 +67,7 @@
                         <id>output-html</id>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <sourceDocumentName>index.adoc</sourceDocumentName>
+                            <sourceDocumentName>index_de.adoc</sourceDocumentName>
                         </configuration>
                         <goals>
                             <goal>process-asciidoc</goal>

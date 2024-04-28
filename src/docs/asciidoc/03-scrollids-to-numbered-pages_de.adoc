@@ -4,7 +4,7 @@
 Stellt die Backend-API das Laden einer Seite lediglich iterativ mithilfe einer Scroll-ID zur Verfügung,
 so kann nicht frei auf eine bestimmte Seite zugegriffen werden. Es müssen also für das Laden einer Seite n alle vorherigen Seiten abgerufen werden.
 
-image::{imagesdir}/ScrollIdToPaging.svg[]
+image::images/ScrollIdToPaging.svg[]
 
 Um den Zugriff zu beschleunigen, kann auch hier mit einem Cache gearbeitet werden.
 Neben einem klassischen Cache für Seiten inklusive Daten bietet sich ein
@@ -13,7 +13,7 @@ Cache für die Zuordnung von Seitennummer zu Scroll-ID an.
 Werden beim Caching die Suchparameter berücksichtigt, lässt sich das Laden von Daten
 auch bei einer Änderung der Suche beschleunigen.
 
-image::{imagesdir}/ScrollIdToPagingWithCache.svg[]
+image::images/ScrollIdToPagingWithCache.svg[]
 
 Damit lässt sich die Lösung für nicht unterstützte Filter aus <<custom-filters>> auch auf APIs basierend auf
 Scroll-IDs übertragen.
