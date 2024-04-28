@@ -16,7 +16,7 @@ Verwendung benutzerdefinierter, nicht unterstützter Filter.
 Über ein Frontend sollen Entities in einer Liste seitenweise angezeigt werden können.
 Die Darstellung soll sortierbar sein. Außerdem muss nach einigen Attributen gefiltert werden können.
 
-Hierzu soll ein Adapter erstellt werden, das die Daten von einem oder mehreren Backend-Systemen abruft
+Hierzu soll ein Adapter erstellt werden, welches die Daten von einem oder mehreren Backend-Systemen abruft
 und dem Frontend bereitstellt.
 
 Dabei soll natürlich darauf geachtet werden, dass
@@ -28,9 +28,13 @@ der Algorithmus performant und ressourcenschonend arbeitet
 
 Die APIs können bei weitem nicht das, was gebraucht wird:
 
-Es fehlen wichtige Filtermöglichkeiten, das seitenweise Abrufen funktioniert über eine
-Scroll-ID statt über eine Seitennummer, und / oder für manche Abfragen müssen mehrere
+Es fehlen wichtige Filtermöglichkeiten, das seitenweise Abrufen funktioniert nur über eine
+Scroll-ID statt über eine Seitennummer, und für manche Abfragen müssen mehrere
 Aufrufe gemacht und die Ergebnisse zusammengeführt werden.
+
+Das sind eine Menge Probleme auf einmal, aber sie sind lösbar!
+
+Ich werde sie mit euch der Reihe nach betrachten und jeweils eine Lösung erarbeiten und in Java implementieren.
 
 [[custom-filters]]
 == Nicht unterstützte Filter
