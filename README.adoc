@@ -2,6 +2,7 @@
 :figure-caption: Abbildung
 :toc:
 :toc-title:
+:toclevels: 1
 
 link:README_en.adoc[-> english version]
 
@@ -112,7 +113,7 @@ im Ergebnis jedoch mit zu Seite 1 gehört.
 
 Gehen wir das einmal schrittweise durch:
 
-*Schritt 1*
+=== Schritt 1
 
 Von A wird die erste Seite gelesen und gefiltert. Die angeforderte Seite ist damit noch nicht gefüllt.
 
@@ -120,7 +121,7 @@ Von A wird die erste Seite gelesen und gefiltert. Die angeforderte Seite ist dam
 .Ergebnisliste mit ersten Daten aus A füllen
 image::images/MergeResponsesKomplexSolution1.svg[]
 
-*Schritt 2*
+=== Schritt 2
 
 Also wird die erste Seite mit Daten von B gelesen. Die gefilterten Daten werden zu den bisherigen
 Ergebnissen sortiert. In der Ergebnisliste fehlt noch immer ein Eintrag.
@@ -129,7 +130,7 @@ Ergebnissen sortiert. In der Ergebnisliste fehlt noch immer ein Eintrag.
 .Daten aus B hinzu sortieren
 image::images/MergeResponsesKomplexSolution2.svg[]
 
-*Schritt 3*
+=== Schritt 3
 
 Es wird die nächste Seite von A (Page 2) geladen. Es gibt noch einen Wert (die "7"), die in die Ergebnisliste
 übernommen werden kann, dann ist sie gefüllt. Es kann aber sein, dass in B noch Werte vorhanden sind,
@@ -139,7 +140,7 @@ die zwischen "2" und "6" einsortiert werden müssen.
 .Weitere Daten aus A hinzu sortieren
 image::images/MergeResponsesKomplexSolution3.svg[]
 
-*Schritt 4*
+=== Schritt 4
 
 Es wird die nächste Seite von B (Page 2) geladen. Hier gibt es tatsächlich noch die Werte "3" und "4", die
 in die Ergebnisliste übernommen werden müssen. "6" und "7" werden in die nächste Seite verschoben
@@ -149,7 +150,7 @@ in die Ergebnisliste übernommen werden müssen. "6" und "7" werden in die näch
 .Weitere Daten aus B hinzu sortieren
 image::images/MergeResponsesKomplexSolution4.svg[]
 
-*Schritt 5*
+=== Schritt 5
 
 Jetzt wird geprüft, ob es in A (die bereits geladene aber noch nicht vollständig übernommene Page 2) oder
 in B (die nächste Page 3) noch Daten gibt, die kleiner als der letzte Eintrag ("4") der Ergebnisliste sind.
@@ -159,7 +160,7 @@ Das ist nicht der Fall, damit kann das Ergebnis (Page 1) abgeliefert werden.
 .Prüfen, ob weitere releante Daten vorhanden sind
 image::images/MergeResponsesKomplexSolution5.svg[]
 
-*Daraus eribt sich dieser Algorithmus:*
+=== Daraus eribt sich dieser Algorithmus
 
 Gegeben sind `n` Input-Methoden `M~1~ ... M~n~` mit jeweils einem `Index~n~` mit `(_Page#_, _Item#_)`,
 der auf das nächste zu verwendene Element verweist.
@@ -172,7 +173,7 @@ der auf das nächste zu verwendene Element verweist.
    d.h. `Index~x~` verweist auf das erste Element der folgenden Seite
 3. Wenn ja, mache bei 1. weiter.
 
-*Caching*
+=== Caching
 
 Für einen performanten Zugriff auf eine bestimmte Ergebnisseite können die Caching-Mechanismen der vorherigen Kapitel
 angewandt werden.
