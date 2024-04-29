@@ -21,7 +21,7 @@ und dem Frontend bereitstellt.
 Dabei soll natürlich darauf geachtet werden, dass
 notwendige Zugriffe auf die genutzte(n) APIs so gering und klein wie nötig gehalten werden,
 Sortierung und Paging über die gesamte Ergebnisliste hinweg konsistent sind und
-der Algorithmus performant und ressourcenschonend arbeitet
+der Algorithmus performant und ressourcenschonend arbeitet.
 
 *Nach Sichtung der zur Verfügung stehenden APIs stellt sich Ernüchterung ein.*
 
@@ -31,9 +31,9 @@ Es fehlen wichtige Filtermöglichkeiten, das seitenweise Abrufen funktioniert nu
 Scroll-ID statt über eine Seitennummer, und für manche Abfragen müssen mehrere
 Aufrufe gemacht und die Ergebnisse zusammengeführt werden.
 
-Das sind eine Menge Probleme auf einmal, aber sie sind lösbar!
+Das sind eine Menge Probleme auf einmal. Aber sie sind allesamt lösbar!
 
-Ich werde sie mit euch der Reihe nach betrachten und jeweils eine Lösung erarbeiten und in Java implementieren.
+Ich werde sie mit euch der Reihe nach durchgehen und jeweils eine Lösung erarbeiten und in Java implementieren.
 
 [[custom-filters]]
 == Nicht unterstützte Filter
