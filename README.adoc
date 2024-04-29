@@ -48,7 +48,7 @@ Ergebnisseite zu füllen.
 image::images/PagingWithFilter.svg[]
 
 Um doppelte Abfragen auf die Quelldaten zu vermeiden, sollten diese mit einem Cache versehen werden.
-(Im Beispiel <<custom-filters-image01>> muss für zwei verschiedene Ergebnisseiten auf Page 2 zugegriffen werden.)
+(Im Beispiel <<custom-filters-image01>> muss für zwei verschiedene Ergebnisseiten auf Input-Page 2 zugegriffen werden.)
 
 Damit die Quelldaten nicht immer von Anfang an durchlaufen werden müssen, ist ein zusätzlicher zweiter Cache
 für die Ergebnisseiten nötig. Wenn nur Indizes auf die Quelldaten im Cache liegen, kann dieser sehr groß gewählt
@@ -62,7 +62,7 @@ image::images/PagingWithFilterAndCache.svg[]
 == Scroll-ID statt Seitennummer
 
 Stellt die Backend-API das Laden einer Seite lediglich iterativ mithilfe einer Scroll-ID zur Verfügung,
-so kann nicht frei auf eine bestimmte Seite zugegriffen werden. Es müssen also für das Laden einer Seite n alle vorherigen Seiten abgerufen werden.
+so kann nicht frei auf eine bestimmte Seite zugegriffen werden. Es müssen also für das Laden einer Seite alle vorherigen Seiten abgerufen werden.
 
 [[scrollid-to-pagenumber-image03]]
 .Mapping von ScrollId zu Seitennummer
@@ -79,7 +79,7 @@ auch bei einer Änderung der Suche beschleunigen.
 .Mapping von ScrollId zu Seitennummer - Nutzen von 2 Caches
 image::images/ScrollIdToPagingWithCache.svg[]
 
-Damit lässt sich die Lösung im Kapitel <<custom-filters>> auch auf APIs basierend auf
+Mit dieser Vorgehensweise lässt sich die Lösung in Kapitel <<custom-filters>> auch auf APIs basierend auf
 Scroll-IDs übertragen.
 
 [[merge-responses]]
@@ -101,7 +101,7 @@ Dieser einfache Fall stellt leider einen Idealfall dar. In der Regel muss mit Ei
 image::images/MergeResponsesKomplex.svg[]
 
 Mit den Mitteln aus den Kapiteln <<custom-filters>> und <<scrollid-to-pagenumber>> haben wir jedoch schon gute
-Werkzeuge an der Hand, die - erweitert um etwas Logik - auch dieses Problem lösen.
+Werkzeuge an der Hand, um - erweitert um etwas Logik - auch dieses Problem zu lösen.
 
 Angenommen, wir haben in einer API zwei Suchmethoden, die beide benötigt werden, um eine Liste mit Ergebnissen
 zu liefern. Beide Methoden unterstützen dieselbe Sortierung (hier aufsteigend numerisch), und beide bieten ein
@@ -111,14 +111,14 @@ werden können, mit einer Seitengröße von 4.
 Um diese Liste zu füllen, müssen nach und nach Daten von A und B nachgeladen und einsortiert werden, bis eine Seite
 vollständig ist. Die Herausforderung besteht darin, zu wissen, _wann_ sie vollständig ist.
 
-In der Abbildung <<merge-responses-image06>> ist zu sehen, dass der Wert "3" erst mit Seite 2 von B geladen werden kann,
+In Abbildung <<merge-responses-image06>> ist zu sehen, dass der Wert "3" erst mit Seite 2 von B geladen werden kann,
 im Ergebnis jedoch mit zu Seite 1 gehört.
 
 Gehen wir das einmal schrittweise durch:
 
 === Schritt 1
 
-Von A wird die erste Seite gelesen und gefiltert. Die angeforderte Seite ist damit noch nicht gefüllt.
+Von A wird die erste Seite gelesen und gefiltert. Die angeforderte Seite ist damit zur Hälfte gefüllt.
 
 [[merge-responses-image07]]
 .Ergebnisliste mit ersten Daten aus A füllen
@@ -127,7 +127,7 @@ image::images/MergeResponsesKomplexSolution1.svg[]
 === Schritt 2
 
 Also wird die erste Seite mit Daten von B gelesen. Die gefilterten Daten werden zu den bisherigen
-Ergebnissen sortiert. In der Ergebnisliste fehlt noch immer ein Eintrag.
+Ergebnissen sortiert. In der Ergebnisseite fehlt noch immer ein Eintrag.
 
 [[merge-responses-image08]]
 .Daten aus B hinzu sortieren
@@ -135,8 +135,8 @@ image::images/MergeResponsesKomplexSolution2.svg[]
 
 === Schritt 3
 
-Es wird die nächste Seite von A (Page 2) geladen. Es gibt noch einen Wert (die "7"), die in die Ergebnisliste
-übernommen werden kann, dann ist sie gefüllt. Es kann aber sein, dass in B noch Werte vorhanden sind,
+Es wird die nächste Seite von A (Page 2) geladen. Es gibt noch einen Wert ("7"), der in die Ergebnisliste
+übernommen werden kann, dann ist sie gefüllt. Es kann jedoch sein, dass in B noch Werte vorhanden sind,
 die zwischen "2" und "6" einsortiert werden müssen.
 
 [[merge-responses-image09]]
@@ -146,8 +146,7 @@ image::images/MergeResponsesKomplexSolution3.svg[]
 === Schritt 4
 
 Es wird die nächste Seite von B (Page 2) geladen. Hier gibt es tatsächlich noch die Werte "3" und "4", die
-in die Ergebnisliste übernommen werden müssen. "6" und "7" werden in die nächste Seite verschoben
-(diese kann für später gepuffert werden).
+in die Ergebnisliste übernommen werden müssen. "6" und "7" werden in die nächste Seite verschoben.
 
 [[merge-responses-image10]]
 .Weitere Daten aus B hinzu sortieren
