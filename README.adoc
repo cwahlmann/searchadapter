@@ -6,8 +6,7 @@
 
 link:README_en.adoc[-> english version]
 
-Ein Algorithmus zum Zusammenführen mehrerer seitenbasierter Suchen in eine seitenbasierte und gefilterte Suche unter
-Verwendung benutzerdefinierter, nicht unterstützter Filter.
+Ein Adapter für Such-APIs, die nicht tun was sie sollen.
 
 == Im Dschungel der Such-APIs
 

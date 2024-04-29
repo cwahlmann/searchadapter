@@ -4,6 +4,6 @@
 
 link:README.adoc[-> deutsche Version]
 
-An algorithm to merge multiple paged searches into one paged and filtered search using custom unsupported filters.
+An adapter for search APIs that don't do what they are supposed to.
 
 TODO
