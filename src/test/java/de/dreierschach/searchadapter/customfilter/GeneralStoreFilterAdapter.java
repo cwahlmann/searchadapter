@@ -20,7 +20,7 @@ public class GeneralStoreFilterAdapter
     }
 
     @Override
-    public boolean filter(Item item, CustomFilter customFilter) {
+    public boolean test(Item item, CustomFilter customFilter) {
         return customFilter.eatable() == null || item.eatable() == customFilter.eatable();
     }
 

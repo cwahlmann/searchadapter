@@ -26,9 +26,22 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
 
     // -------- abstract methods
 
+    /**
+     * Delegate a search-request to the underlying repository and map the result
+     *
+     * @param search the search-request
+     * @return the search-result
+     */
     abstract protected PagedSearchResult<T> find(PagedSearch<U> search);
 
-    abstract protected boolean filter(T item, V customFilter);
+    /**
+     * tests is an item matches the custom filter
+     *
+     * @param item the item to test
+     * @param customFilter the custom filter
+     * @return true, if the item matches the filter
+     */
+    abstract protected boolean test(T item, V customFilter);
 
     // -------- public methods
 
@@ -63,7 +76,7 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
             if (searchResult.items().isEmpty()) {
                 return new PagedSearchResult<>(itemsResult, pagedSearchWithFilter.page(), pagedSearchWithFilter.pageSize());
             }
-            itemsResult.addAll(searchResult.items().stream().filter(item -> filter(item, pagedSearchWithFilter.customFilter())).skip(index.item()).toList());
+            itemsResult.addAll(searchResult.items().stream().skip(index.item()).filter(item -> test(item, pagedSearchWithFilter.customFilter())).toList());
             index = new Index(index.page() + 1, 0);
         }
         return new PagedSearchResult<>(itemsResult.stream().limit(pagedSearchWithFilter.pageSize()).toList(), pagedSearchWithFilter.page(), pagedSearchWithFilter.pageSize());
@@ -146,7 +159,7 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
             if (items.isEmpty()) {
                 return Index.NONE;
             }
-            var inputIndexes = IntStream.iterate(0, i -> i < items.size(), i -> i + 1).filter(i -> filter(items.get(i), search.customFilter()))
+            var inputIndexes = IntStream.iterate(0, i -> i < items.size(), i -> i + 1).filter(i -> test(items.get(i), search.customFilter()))
                     .boxed().toList();
 
             outputItemIndex += inputIndexes.size();
