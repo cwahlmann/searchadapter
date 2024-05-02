@@ -46,6 +46,8 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
     // -------- public methods
 
     /**
+     * initialize caches for input-pages and indexes
+     *
      * @param inputCacheSize a cache for requests to the underlying repository
      * @param indexCacheSize a cache for information, which pages to request when filling a result-page - this cache may be
      *                       quite big, because it stores only two long values
@@ -69,16 +71,30 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
      * @return a result-page
      */
     public PagedSearchResult<T> findAndFilter(PagedSearchWithFilter<U, V> pagedSearchWithFilter) {
+        // find position to start reading data for the output-page
         var index = cachedFindIndex(pagedSearchWithFilter);
+        if (index == Index.NONE) {
+            return new PagedSearchResult<>(List.of(), pagedSearchWithFilter.page(), pagedSearchWithFilter.pageSize());
+        }
+
         var itemsResult = new ArrayList<T>();
+        // read data as long as is needed and as there is any
         while (itemsResult.size() < pagedSearchWithFilter.pageSize()) {
+            // read input page
             var searchResult = cachedFind(new PagedSearch<>(pagedSearchWithFilter.search(), index.page(), pagedSearchWithFilter.pageSize()));
+
+            // stop when there is no result
             if (searchResult.items().isEmpty()) {
                 return new PagedSearchResult<>(itemsResult, pagedSearchWithFilter.page(), pagedSearchWithFilter.pageSize());
             }
+
+            // add all filtered items
             itemsResult.addAll(searchResult.items().stream().skip(index.item()).filter(item -> test(item, pagedSearchWithFilter.customFilter())).toList());
+
+            // continue reading at the start of the next input-page
             index = new Index(index.page() + 1, 0);
         }
+        // return read items, limited to the page-size
         return new PagedSearchResult<>(itemsResult.stream().limit(pagedSearchWithFilter.pageSize()).toList(), pagedSearchWithFilter.page(), pagedSearchWithFilter.pageSize());
     }
 
@@ -126,6 +142,11 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
 
     // -------- private types
 
+    /**
+     * an index points to the input-data that needs to be read next to fill a requested output page
+     * @param page the input page-number
+     * @param item the input item-index (not filtered!)
+     */
     record Index(long page, long item) {
         public static final Index NONE = new Index(-1, -1);
     }
@@ -150,25 +171,51 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
 
     // find the index (input-page, input-item-index) for a requested page
     private Index findIndex(PagedSearchWithFilter<U, V> search) {
+        // begin at the beginning of the first page
         var index = new Index(0, 0);
+
+        // counts up to the requested page
         long outputPage = 0;
+
+        // holds the position in the output-page, where the next data would be stored
         long outputItemIndex = 0;
+
+        // the current input-page
         long inputPage = 0;
+
         while (outputPage < search.page()) {
+            // read next data from cache or repository
             var items = cachedFind(new PagedSearch<>(search.search(), inputPage, search.pageSize())).items();
+
+            // no more items found? Then there is no date for the requested page
             if (items.isEmpty()) {
                 return Index.NONE;
             }
+
+            // map the data to indexes and filter them
             var inputIndexes = IntStream.iterate(0, i -> i < items.size(), i -> i + 1).filter(i -> test(items.get(i), search.customFilter()))
                     .boxed().toList();
 
+            // update index in output-page
             outputItemIndex += inputIndexes.size();
+
+            // is the current output page full?
             if (outputItemIndex > search.pageSize()) {
+                // update output-page
                 outputPage += outputItemIndex / search.pageSize();
+
+                // update output-index
                 outputItemIndex = outputItemIndex % search.pageSize();
-                index = new Index(outputPage, inputIndexes.get((int) (search.pageSize() - outputItemIndex - 1)));
+
+                // recalculate the requested index
+                index = new Index(inputPage, inputIndexes.get((int) (search.pageSize() - outputItemIndex - 1)));
             }
+
+            // load the next input page
+            inputPage++;
         }
+
+        // the requested output-page is reached, return the current calculated input-index
         return index;
     }
 }
