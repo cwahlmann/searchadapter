@@ -6,7 +6,7 @@
 
 link:README_en.adoc[-> english version]
 
-image::images/strangeApi.png[]
+image::images/searchAdapter.png[]
 
 Ein Adapter für Such-APIs, die nicht tun was sie sollen.
 

@@ -4,7 +4,7 @@
 
 link:README.adoc[-> deutsche Version]
 
-image::images/strangeApi.png[]
+image::images/searchAdapter.png[]
 
 An adapter for search APIs that don't do what they are supposed to.
 
