@@ -1,10 +1,9 @@
-package de.dreierschach.searchadapter.customfilter;
+package de.dreierschach.searchadapter.customFilter;
 
-import de.dreierschach.searchadapter.customFilter.SearchWithFilterAdapter;
 import de.dreierschach.searchadapter.customFilter.SearchWithFilterAdapter.PagedSearchWithFilter;
-import de.dreierschach.searchadapter.customfilter.GeneralStoreFilterAdapter.CustomFilter;
-import de.dreierschach.searchadapter.customfilter.GeneralStoreRepository.Item;
-import de.dreierschach.searchadapter.customfilter.GeneralStoreRepository.Search;
+import de.dreierschach.searchadapter.customFilter.GeneralStoreFilterAdapter.CustomFilter;
+import de.dreierschach.searchadapter.customFilter.GeneralStoreRepository.Item;
+import de.dreierschach.searchadapter.customFilter.GeneralStoreRepository.Search;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

@@ -1,8 +1,7 @@
-package de.dreierschach.searchadapter.customfilter;
+package de.dreierschach.searchadapter.customFilter;
 
-import de.dreierschach.searchadapter.customFilter.SearchWithFilterAdapter;
-import de.dreierschach.searchadapter.customfilter.GeneralStoreRepository.Item;
-import de.dreierschach.searchadapter.customfilter.GeneralStoreRepository.Search;
+import de.dreierschach.searchadapter.customFilter.GeneralStoreRepository.Item;
+import de.dreierschach.searchadapter.customFilter.GeneralStoreRepository.Search;
 
 public class GeneralStoreFilterAdapter
         extends SearchWithFilterAdapter<Item, Search, GeneralStoreFilterAdapter.CustomFilter> {

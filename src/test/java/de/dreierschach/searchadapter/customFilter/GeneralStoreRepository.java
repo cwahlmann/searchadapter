@@ -1,4 +1,4 @@
-package de.dreierschach.searchadapter.customfilter;
+package de.dreierschach.searchadapter.customFilter;
 
 import org.apache.commons.lang3.StringUtils;
 
