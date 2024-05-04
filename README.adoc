@@ -70,7 +70,7 @@ public PagedSearchResult<T> <1>
 <2> *U* = Typ des nativen _Such-Requests_
 <3> *V* = Typ des von der Such-API nicht unterstützten, _zusätzlichen Filters_
 
-Diese Methode muss dann zunächst den korrekten *Index* auf die Input-Daten ermitteln,
+Diese Methode muss zunächst den korrekten *Index* auf die Input-Daten ermitteln,
 also die richtige Seitennummer und das erste relevante Item innerhalb dieser
 Seite. Das Ermitteln des Index lagern wir in eine weitere Methode aus, um später einen Cache
 hinzufügen zu können.
