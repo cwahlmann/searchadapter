@@ -190,7 +190,7 @@ abstract PagedSearchResult<T> find(PagedSearch<U> pagedSearch); <6>
     Wert deutlich größer gewählt werden.
 <6> Diese Methode muss für eine Suche mit der konkreten Input-API implementiert werden.
 
-Den gesamten Quellcode für das `SearchWithFilterAdapter` gibt es
+Den gesamten Quellcode für den `SearchWithFilterAdapter` gibt es
 link:src/main/java/de/dreierschach/searchadapter/customFilter/SearchWithFilterAdapter.java[hier],
 eine Test-Implementierung des Adapters findet sich
 link:src/test/java/de/dreierschach/searchadapter/customFilter/[in diesem Ordner].
