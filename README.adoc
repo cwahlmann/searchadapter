@@ -121,7 +121,7 @@ Jetzt wird die Ergebnisseite so lange mit Daten aufgefüllt, bis sie die richtig
 erreicht oder keine weiteren Daten mehr zur Verfügung stehen:
 
 [source, Java]
-.Die vollständige Haupt-Suchmethode
+.Die vollständige Suchmethode
 ----
 public PagedSearchResult<T> findAndFilter(PagedSearchWithFilter<U, V> pagedSearchWithFilter)
 
@@ -153,7 +153,7 @@ if (index == Index.NONE) { <1>
 <4> Mache bei der nächsten Seite und dem ersten Item darin weiter.
 <5> Als Ergebnis wird die Seite, beschnitten auf die geforderte Seitenlänge, zurückgegeben.
 
-Für die Caches nutze ich `Caffeine`.
+Für die Caches nutze ich `Caffeine` (siehe link:https://github.com/ben-manes/caffeine[]):
 
 [source, Java]
 .Implementierung der beiden Caches
@@ -162,13 +162,13 @@ private Cache<PagedSearch<U>, PagedSearchResult<T>> inputCache; <1>
 private Cache<PagedSearchWithFilter<U, V>, Index> indexCache; <2>
 
 inputCache = Caffeine.newBuilder()
-        .expireAfterWrite(5, MINUTES)
-        .maximumSize(inputCacheSize)
+        .expireAfterWrite(5, MINUTES) <3>
+        .maximumSize(inputCacheSize) <4>
         .build();
 
 indexCache = Caffeine.newBuilder()
-        .expireAfterWrite(5, MINUTES)
-        .maximumSize(indexCacheSize)
+        .expireAfterWrite(5, MINUTES) <3>
+        .maximumSize(indexCacheSize) <5>
         .build();
 
 private Index cachedFindIndex(PagedSearchWithFilter<U, V> search) {
@@ -179,11 +179,16 @@ private PagedSearchResult<T> cachedFind(PagedSearch<U> pagedSearch) {
     return inputCache.get(pagedSearch, this::find);
 }
 
-abstract PagedSearchResult<T> find(PagedSearch<U> pagedSearch); <3>
+abstract PagedSearchResult<T> find(PagedSearch<U> pagedSearch); <6>
 ----
-<1> Der Cache für Input-Pages, abhängig von der aktuellen Suche.
-<2> Der Cache für Indexes, abhängig von der aktuellen Suche und dem aktuellen, zusätzlichen Filter.
-<3> Diese Methode muss für eine Suche mit der konkreten Input-API implementiert werden.
+<1> Der Cache für *Input-Seiten*, abhängig von der aktuellen Suche.
+<2> Der Cache für *Indexe*, abhängig von der aktuellen Suche und dem aktuellen, zusätzlichen Filter.
+<3> In dieser Konfiguration werden die Daten nach 5 Minuten neu geladen. Dieser Wert muss entsprechend den
+    Anforderungen der Anwendung gewählt werden.
+<4> Die Anzahl *Input-Seiten*, die der Cache fasst.
+<5> Die Anzahl der *Indexe*, die der Cache fasst. Da ein Index aus zwei `long` besteht, kann dieser
+    Wert deutlich größer gewählt werden.
+<6> Diese Methode muss für eine Suche mit der konkreten Input-API implementiert werden.
 
 Den gesamten Quellcode für das `SearchWithFilterAdapter` gibt es
 link:src/main/java/de/dreierschach/searchadapter/customFilter/SearchWithFilterAdapter.java[hier],
