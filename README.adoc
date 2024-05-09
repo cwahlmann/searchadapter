@@ -181,9 +181,32 @@ abstract PagedSearchResult<T> find(PagedSearch<U> pagedSearch); <4>
 <3> Die Anzahl *Input-Seiten*, die der Cache fasst.
 <4> Diese Methode muss für eine Suche mit der konkreten Input-API implementiert werden.
 
-Für den *Index-Cache* müssen wir ein paar Dinge beachten:
+Der *Index-Cache* funktioniert ähnlich, wir müssen allerdings ein paar Dinge beachten.
 
-Da die Indexe iterativ gefunden werden, macht es Sinn, alle unterwegs gefundenen Indexe im Cache abzulegen, nicht nur den gesuchten.
+[source, Java]
+.Implementierung des Index-Cache
+----
+indexCache = Caffeine.newBuilder()
+    .expireAfterWrite(5, MINUTES)
+    .maximumSize(indexCacheSize) <1>
+    .build();
+
+private Index cachedFindIndex(PagedSearchWithFilter<U, V> search) {
+    var result = indexCache.getIfPresent(search); <2>
+    if (result != null) {
+        return result;
+    }
+    return findIndex(search, findLastCachedIndex(search)); <3>
+}
+----
+<1> Die Kapazität des Index-Cache kann und sollte deutlich größer als die des Input-Caches gewählt werden.
+<2> Damit neben dem gesuchten Index weitere Indexe im Cache gespeichert werden können,
+darf nicht die Lamda-Funktion des Caches genutzt werden.  Änderungen des Cache
+da innerhalb dieser Lambda-Funktion sind nicht erlaubt.
+<3> Es wurde kein Eintrag zur gesuchten Seite gefunden. Ermittle den Index ausgehen vom letzten im Cache gespeicherten
+Index (siehe unten).
+
+*Da die Indexe iterativ gefunden werden, macht es Sinn, alle unterwegs gefundenen Indexe im Cache abzulegen, nicht nur den gesuchten.*
 
 [source, Java]
 .gefundene Indexe im Cache speichern
@@ -201,7 +224,7 @@ private Index findIndex(PagedSearchWithFilter<U, V> search, OutputPageAndIndex s
 
 <1> Jeden gefundenen Index im Cache speichern.
 
-Die Suche nach einem Index zu einer angefragten Output-Seite sollte beim letzten bekannten Index beginnen.
+*Die Suche nach einem Index zu einer angefragten Output-Seite sollte beim letzten bekannten Index beginnen.*
 
 .Starte Index-Suche beim letzten gecachten Index
 image::images/FindLastCachedIndex.svg[]
@@ -213,23 +236,6 @@ Gerade diese zweite Anforderung kann ein Cache normalerweise nicht leisten, da C
 Der Key liegt nicht als sortierte Liste vor, es gibt deswegen keinen guten Suchalgorithmus für einen maximalen Wert,
 kleiner als ein bestimmter Wert. Ein Sortieren des KeySet des Cache ist u.U. aufwändiger, als den Cache einfach
 - beginnend von der gesuchten Seite an - abwärts nach einem bereits bekannten Index zu durchsuchen.
-
-[source, java]
-.Abfrage des Cache ohne Lambda-Funktion
-----
-private Index cachedFindIndex(PagedSearchWithFilter<U, V> search) {
-    var result = indexCache.getIfPresent(search); <1>
-    if (result != null) {
-        return result;
-    }
-    return findIndex(search, findLastCachedIndex(search)); <2>
-}
-----
-<1> Damit neben dem gesuchten Index weitere Indexe im Cache gespeichert werden können,
-  darf nicht die Lamda-Funktion des Caches genutzt werden.  Änderungen des Cache
-  da innerhalb dieser Lambda-Funktion sind nicht erlaubt.
-<2> Es wurde kein Eintrag zur gesuchten Seite gefunden. Ermittle den Index ausgehen vom letzten im Cache gespeicherten
-  Index.
 
 Methode, um den letzten im Cache gespeicherten Index zu einer Output-Seite zu finden.
 
@@ -279,11 +285,14 @@ image::images/ScrollIdToPagingWithCache.svg[]
 
 Mit dieser Vorgehensweise lässt sich die Lösung in Kapitel <<custom-filters>> auch auf APIs basierend auf Scroll-IDs übertragen.
 
-Eine Implementierung ist mehr oder weniger trivial. Die Zuordnung von Input- zu Output-Seite ist
-1:1, es muss lediglich ein Cache (Output-Seite -> Scroll-Id) verwendet werden, der ähnlich wie der
-Index-Cache aus <<custom-filters>> arbeitet. Also auch hier sollten alle beim Iterieren gefundenen Scroll-Ids im Cache
-gespeichert werden, und bei der Suche nach einer Scroll-ID sollte bei der letzten bekannten Scroll-Id
-begonnen werden.
+Eine Implementierung ist mehr oder weniger trivial.
+
+Die Zuordnung von Input- zu Output-Seite ist 1:1, es muss lediglich ein Cache (Output-Seite -> Scroll-Id) statt
+(Output-Seite -> Input-Seite) verwendet werden.
+Dieser arbeitet ähnlich wie der Index-Cache aus <<custom-filters>>.
+
+Auch hier sollten alle beim Iterieren gefundenen Scroll-Ids im Cache gespeichert werden, und bei der Suche nach einer
+Scroll-ID sollte bei der letzten bekannten Scroll-Id begonnen werden.
 
 [[merge-responses]]
 == Ergebnisse mehrerer Suchen
