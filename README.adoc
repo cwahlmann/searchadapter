@@ -192,10 +192,10 @@ image::images/FindLastCachedIndex.svg[]
 Im Beispiel wird die Seite 105 angefragt. Der letzte gespeicherte Index existiert zu Seite 101. Also
 muss ab Seite 101 iteriert werden, um den Index für Seite 105 zu errechnen.
 
-Gerade die zweite Anforderung kann ein Cache normalerweise nicht leisten, da Caches als Map organisiert sind.
-Der Key liegt also nicht als sortierte Liste vor, auf der man den einen Wert finden könnte, der maximal ist, aber
-kleiner als ein bestimmter Wert. Der Cache muss deswegen beginnend von der gesuchten Seite abwärts nach einem
-bereits bekannten Index durchsucht werden.
+Gerade diese zweite Anforderung kann ein Cache normalerweise nicht leisten, da Caches als Map organisiert sind.
+Der Key liegt nicht als sortierte Liste vor, es gibt deswegen keinen guten Suchalgorithmus für einen maximalen Wert,
+kleiner als ein bestimmter Wert. Ein Sortieren des KeySet des Cache ist u.U. aufwändiger, als den Cache einfach
+- beginnend von der gesuchten Seite an - abwärts nach einem bereits bekannten Index zu durchsuchen.
 
 [source, java]
 .Abfrage des Cache ohne Lambda-Funktion
