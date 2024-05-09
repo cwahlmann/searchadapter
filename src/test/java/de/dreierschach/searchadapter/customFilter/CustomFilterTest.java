@@ -87,4 +87,27 @@ class CustomFilterTest {
         assertThat(result.items()).hasSize(1);
         assertThat(result.items()).containsExactly(ZUCCHINI);
     }
+
+    @Test
+    void testNoCache() {
+        // adapter.enableCache(2, 5);
+        adapter.findAndFilter(new PagedSearchWithFilter<>(new Search(null, Search.SortBy.NAME), new CustomFilter(true), 2, 4));
+        adapter.findAndFilter(new PagedSearchWithFilter<>(new Search(null, Search.SortBy.NAME), new CustomFilter(true), 1, 4));
+        adapter.findAndFilter(new PagedSearchWithFilter<>(new Search(null, Search.SortBy.NAME), new CustomFilter(true), 0, 4));
+        adapter.findAndFilter(new PagedSearchWithFilter<>(new Search(null, Search.SortBy.NAME), new CustomFilter(true), 2, 4));
+        log.info("==> requests without cache:  {}", repository.getRequestCount());
+        assertThat(repository.getRequestCount()).isEqualTo(16);
+    }
+
+    @Test
+    void testCache() {
+        adapter.enableCache(2, 2);
+
+        adapter.findAndFilter(new PagedSearchWithFilter<>(new Search(null, Search.SortBy.NAME), new CustomFilter(true), 2, 4));
+        adapter.findAndFilter(new PagedSearchWithFilter<>(new Search(null, Search.SortBy.NAME), new CustomFilter(true), 1, 4));
+        adapter.findAndFilter(new PagedSearchWithFilter<>(new Search(null, Search.SortBy.NAME), new CustomFilter(true), 0, 4));
+        adapter.findAndFilter(new PagedSearchWithFilter<>(new Search(null, Search.SortBy.NAME), new CustomFilter(true), 2, 4));
+        log.info("==> requests with cache:  {}", repository.getRequestCount());
+        assertThat(repository.getRequestCount()).isLessThanOrEqualTo(8);
+    }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static de.dreierschach.searchadapter.customFilter.SearchWithFilterAdapter.OutputPageAndIndex.FIRST;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
@@ -37,7 +38,7 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
     /**
      * tests is an item matches the custom filter
      *
-     * @param item the item to test
+     * @param item         the item to test
      * @param customFilter the custom filter
      * @return true, if the item matches the filter
      */
@@ -103,22 +104,23 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
     /**
      * A search-request with pagination to delegate to a search-method of the underlying repository
      *
-     * @param search the search-request
-     * @param page the requested pagenumber
+     * @param search   the search-request
+     * @param page     the requested pagenumber
      * @param pageSize the requested page size
-     * @param <U> the search-request-type
+     * @param <U>      the search-request-type
      */
     public record PagedSearch<U>(U search, long page, long pageSize) {
     }
 
     /**
      * An extended search-request with pagination and a custom filter
-     * @param search the search-request
-     * @param page the requested pagenumber
-     * @param pageSize the requested page size
+     *
+     * @param search       the search-request
+     * @param page         the requested pagenumber
+     * @param pageSize     the requested page size
      * @param customFilter the custom filter
-     * @param <U> the search-request type
-     * @param <V> the custom filter type
+     * @param <U>          the search-request type
+     * @param <V>          the custom filter type
      */
     public record PagedSearchWithFilter<U, V>(U search, V customFilter, long page, long pageSize) {
     }
@@ -126,10 +128,10 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
     /**
      * The result of a search
      *
-     * @param items a list of items
-     * @param page the page-number
+     * @param items    a list of items
+     * @param page     the page-number
      * @param pageSize the page-size
-     * @param <T> the items type
+     * @param <T>      the items type
      */
     public record PagedSearchResult<T>(List<T> items, long page, long pageSize) {
         public String toString() {
@@ -144,6 +146,7 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
 
     /**
      * an index points to the input-data that needs to be read next to fill a requested output page
+     *
      * @param page the input page-number
      * @param item the input item-index (not filtered!)
      */
@@ -161,21 +164,54 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
         return find(pagedSearch);
     }
 
-    // use cache für indexes
+    // use cache for indexes
     private Index cachedFindIndex(PagedSearchWithFilter<U, V> search) {
-        if (cacheEnabled) {
-            return indexCache.get(search, this::findIndex);
+        if (!cacheEnabled) {
+            return this.findIndex(search, FIRST);
         }
-        return this.findIndex(search);
+        // When iterating the input-pages, all found indexes will be cached.
+        // To do this, the cache-method get(search, Function<search, index>) cannot be used,
+        // because it is not allowed to add cache values within the lambda-function.
+        var result = indexCache.getIfPresent(search);
+        if (result != null) {
+            return result;
+        }
+        // beginn the iteration at the last cached index prior to the requested
+        return findIndex(search, findLastCachedIndex(search));
     }
 
-    // find the index (input-page, input-item-index) for a requested page
-    private Index findIndex(PagedSearchWithFilter<U, V> search) {
-        // begin at the beginning of the first page
-        var index = new Index(0, 0);
+    // A record for internal use that holds the last cached output-page and index previous to the requested output-page.
+    record OutputPageAndIndex(Long page, Index index) {
+        public static final OutputPageAndIndex FIRST = new OutputPageAndIndex(0L, new Index(0, 0));
+    }
 
+    // find the last index in cache beginning from the requested output-page -1 down to 0
+    OutputPageAndIndex findLastCachedIndex(PagedSearchWithFilter<U, V> search) {
+        // the index for ouput-page 0 is always (0, 0)
+        if (search.page() == 0) {
+            return FIRST;
+        }
+        // find last cached index
+        var i = search.page();
+        PagedSearchWithFilter<U, V> key;
+        do {
+            i--;
+            key = new PagedSearchWithFilter<>(search.search(), search.customFilter(), i, search.pageSize());
+        } while (i > 0 && !indexCache.asMap().containsKey(key));
+        // nothing found? start by 0 / (0, 0)
+        if (i == 0) {
+            return FIRST;
+        }
+        // start searching there
+        return new OutputPageAndIndex(i, indexCache.getIfPresent(key));
+    }
+
+    // find the index (input-page, input-item-index) for a requested output-page, beginning at a known output-page
+    // and index
+    private Index findIndex(PagedSearchWithFilter<U, V> search, OutputPageAndIndex start) {
         // counts up to the requested page
-        long outputPage = 0;
+        long outputPage = start.page();
+        var index = start.index();
 
         // holds the position in the output-page, where the next data would be stored
         long outputItemIndex = 0;
@@ -209,6 +245,11 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
 
                 // recalculate the requested index
                 index = new Index(inputPage, inputIndexes.get((int) (search.pageSize() - outputItemIndex - 1)));
+
+                // add all found indexes to cache
+                if (cacheEnabled) {
+                    indexCache.put(new PagedSearchWithFilter<>(search.search(), search.customFilter(), outputPage, search.pageSize()), index);
+                }
             }
 
             // load the next input page

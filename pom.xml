@@ -42,6 +42,13 @@
 
         <dependency>
             <scope>test</scope>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.10.2</version>
+        </dependency>
+
+        <dependency>
+            <scope>test</scope>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.25.3</version>

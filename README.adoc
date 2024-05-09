@@ -78,9 +78,9 @@ hinzufügen zu können.
 [source, Java]
 .ausgelagerte Methode zur Ermittlung des Index
 ----
-private Index findIndex(PagedSearchWithFilter<U, V> search) {
-    var index = new Index(0, 0); <1>
-    long outputPage = 0;
+private Index findIndex(PagedSearchWithFilter<U, V> search, OutputPageAndIndex start) {
+    var index = start.index(); <1>
+    long outputPage = start.page(); <1>
     long outputItemIndex = 0;
     long inputPage = 0;
     while (outputPage < search.page()) { <2>
@@ -125,8 +125,8 @@ erreicht oder keine weiteren Daten mehr zur Verfügung stehen:
 ----
 public PagedSearchResult<T> findAndFilter(PagedSearchWithFilter<U, V> pagedSearchWithFilter)
 
-    var index = cachedFindIndex(pagedSearchWithFilter);
-if (index == Index.NONE) { <1>
+    var index = findIndex(pagedSearchWithFilter, FIRST);
+    if (index == Index.NONE) { <1>
         return new PagedSearchResult<>(List.of(), pagedSearchWithFilter.page(), pagedSearchWithFilter.pageSize());
     }
 
@@ -153,42 +153,105 @@ if (index == Index.NONE) { <1>
 <4> Mache bei der nächsten Seite und dem ersten Item darin weiter.
 <5> Als Ergebnis wird die Seite, beschnitten auf die geforderte Seitenlänge, zurückgegeben.
 
+=== Caches
+
 Für die Caches nutze ich `Caffeine` (siehe link:https://github.com/ben-manes/caffeine[]):
 
+Der *Input-Cache* ist einfach umgesetzt:
+
 [source, Java]
-.Implementierung der beiden Caches
+.Implementierung des Input-Caches
 ----
 private Cache<PagedSearch<U>, PagedSearchResult<T>> inputCache; <1>
-private Cache<PagedSearchWithFilter<U, V>, Index> indexCache; <2>
 
 inputCache = Caffeine.newBuilder()
-        .expireAfterWrite(5, MINUTES) <3>
-        .maximumSize(inputCacheSize) <4>
+        .expireAfterWrite(5, MINUTES) <2>
+        .maximumSize(inputCacheSize) <3>
         .build();
-
-indexCache = Caffeine.newBuilder()
-        .expireAfterWrite(5, MINUTES) <3>
-        .maximumSize(indexCacheSize) <5>
-        .build();
-
-private Index cachedFindIndex(PagedSearchWithFilter<U, V> search) {
-    return indexCache.get(search, this::findIndex);
-}
 
 private PagedSearchResult<T> cachedFind(PagedSearch<U> pagedSearch) {
     return inputCache.get(pagedSearch, this::find);
 }
 
-abstract PagedSearchResult<T> find(PagedSearch<U> pagedSearch); <6>
+abstract PagedSearchResult<T> find(PagedSearch<U> pagedSearch); <4>
 ----
 <1> Der Cache für *Input-Seiten*, abhängig von der aktuellen Suche.
-<2> Der Cache für *Indexe*, abhängig von der aktuellen Suche und dem aktuellen, zusätzlichen Filter.
-<3> In dieser Konfiguration werden die Daten nach 5 Minuten neu geladen. Dieser Wert muss entsprechend den
+<2> In dieser Konfiguration werden die Daten nach 5 Minuten neu geladen. Dieser Wert muss entsprechend den
     Anforderungen der Anwendung gewählt werden.
-<4> Die Anzahl *Input-Seiten*, die der Cache fasst.
-<5> Die Anzahl der *Indexe*, die der Cache fasst. Da ein Index aus zwei `long` besteht, kann dieser
-    Wert deutlich größer gewählt werden.
-<6> Diese Methode muss für eine Suche mit der konkreten Input-API implementiert werden.
+<3> Die Anzahl *Input-Seiten*, die der Cache fasst.
+<4> Diese Methode muss für eine Suche mit der konkreten Input-API implementiert werden.
+
+Für den *Index-Cache* müssen wir ein paar Dinge beachten:
+
+. Da die Indexe iterativ gefunden werden, macht es Sinn, alle unterwegs gefundenen Indexe im Cache abzulegen, nicht nur den gesuchten.
+. Die Suche nach einem Index zu einer angefragten Output-Seite sollte beim letzten bekannten Index beginnen
+
+.Starte Index-Suche beim letzten gecachten Index
+image::images/FindLastCachedIndex.svg[]
+
+Im Beispiel wird die Seite 105 angefragt. Der letzte gespeicherte Index existiert zu Seite 101. Also
+muss ab Seite 101 iteriert werden, um den Index für Seite 105 zu errechnen.
+
+Gerade die zweite Anforderung kann ein Cache normalerweise nicht leisten, da Caches als Map organisiert sind.
+Der Key liegt also nicht als sortierte Liste vor, auf der man den einen Wert finden könnte, der maximal ist, aber
+kleiner als ein bestimmter Wert. Der Cache muss deswegen beginnend von der gesuchten Seite abwärts nach einem
+bereits bekannten Index durchsucht werden.
+
+[source, java]
+.Abfrage des Cache ohne Lambda-Funktion
+----
+private Index cachedFindIndex(PagedSearchWithFilter<U, V> search) {
+    var result = indexCache.getIfPresent(search); <1>
+    if (result != null) {
+        return result;
+    }
+    return findIndex(search, findLastCachedIndex(search)); <2>
+}
+----
+<1> Damit neben dem gesuchten Index weitere Indexe im Cache gespeichert werden können,
+  darf nicht die Lamda-Funktion des Caches genutzt werden.  Änderungen des Cache
+  da innerhalb dieser Lambda-Funktion sind nicht erlaubt.
+<2> Es wurde kein Eintrag zur gesuchten Seite gefunden. Ermittle den Index ausgehen vom letzten im Cache gespeicherten
+  Index.
+
+
+[source, Java]
+.gefundene Indexe im Cache speichern
+----
+private Index findIndex(PagedSearchWithFilter<U, V> search, OutputPageAndIndex start) {
+    ...
+    if (outputItemIndex > search.pageSize()) {
+        ...
+        index = new Index(...);
+        indexCache.put(new PagedSearchWithFilter<>(search.search(), search.customFilter(), outputPage, search.pageSize()), index); <1>
+    }
+    ...
+}
+----
+
+<1> Jeden gefundenen Index im Cache speichern.
+
+Methode, um den letzten im Cache gespeicherten Index zu einer Output-Seite zu finden.
+
+[source, Java]
+.Suche nach dem letzten bekannten Index
+----
+OutputPageAndIndex findLastCachedIndex(PagedSearchWithFilter<U, V> search) {
+    if (search.page() == 0) {
+        return ROOT;
+    }
+    var i = search.page();
+    PagedSearchWithFilter<U, V> key;
+    do {
+        i--;
+        key = new PagedSearchWithFilter<>(search.search(), search.customFilter(), i, search.pageSize());
+    } while (i > 0 && !indexCache.asMap().containsKey(key));
+    if (i == 0) {
+        return ROOT;
+    }
+    return new OutputPageAndIndex(i, indexCache.getIfPresent(key));
+}
+----
 
 Den gesamten Quellcode für den `SearchWithFilterAdapter` gibt es
 link:src/main/java/de/dreierschach/searchadapter/customFilter/SearchWithFilterAdapter.java[hier],
@@ -215,6 +278,12 @@ Werden beim Caching die Suchparameter berücksichtigt, lässt sich das Laden von
 image::images/ScrollIdToPagingWithCache.svg[]
 
 Mit dieser Vorgehensweise lässt sich die Lösung in Kapitel <<custom-filters>> auch auf APIs basierend auf Scroll-IDs übertragen.
+
+Eine Implementierung ist mehr oder weniger trivial. Die Zuordnung von Input- zu Output-Seite ist
+1:1, es muss lediglich ein Cache (Output-Seite -> Scroll-Id) verwendet werden, der ähnlich wie der
+Index-Cache aus <<custom-filters>> arbeitet. Also auch hier sollten alle beim Iterieren gefundenen Scroll-Ids im Cache
+gespeichert werden, und bei der Suche nach einer Scroll-ID sollte bei der letzten bekannten Scroll-Id
+begonnen werden.
 
 [[merge-responses]]
 == Ergebnisse mehrerer Suchen
