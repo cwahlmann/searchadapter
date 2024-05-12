@@ -41,10 +41,6 @@ public class GeneralStoreRepository {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(new ScrollId("jolla", 12345));
-    }
-
     public record Search(String name, SortBy sort) {
         public enum SortBy {
             NAME(comparing(Item::name)),
