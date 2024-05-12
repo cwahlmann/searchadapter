@@ -1,4 +1,4 @@
-package de.dreierschach.searchadapter.customFilter;
+package de.dreierschach.searchadapter.scrollId;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,13 +15,14 @@ public class GeneralStoreRepository {
         this.items = items;
     }
 
-    public SearchResult search(Search search, long page, long pageSize) {
+    public SearchResult search(Search search, ScrollId scrollId, long pageSize) {
         requestCount++;
+        var page = scrollId != null ? scrollId.id() / pageSize : 0;
         var result = items.stream()
                 .filter(item -> StringUtils.isEmpty(search.name()) || item.name().contains(search.name()))
                 .sorted(search.sort().comparator)
                 .skip(page * pageSize).limit(pageSize).toList();
-        return new SearchResult(result, items.size(), page, pageSize);
+        return new SearchResult(result, items.size(), new ScrollId(search.name() + search.sort(), (page + 1) * pageSize), pageSize);
     }
 
     // count requests for statistics
@@ -32,6 +33,17 @@ public class GeneralStoreRepository {
     }
 
     // ------- types
+
+    public record ScrollId(String key, long id) {
+        @Override
+        public String toString() {
+            return "%s%Hd".formatted(key, id);
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new ScrollId("jolla", 12345));
+    }
 
     public record Search(String name, SortBy sort) {
         public enum SortBy {
@@ -48,13 +60,13 @@ public class GeneralStoreRepository {
     public record Item(String name, boolean eatable) {
     }
 
-    public record SearchResult(List<Item> items, long totalSize, long page, long pageSize) {
+    public record SearchResult(List<Item> items, long totalSize, ScrollId scrollId, long pageSize) {
         public String toString() {
             return "GeneralStore:" +
-                    "-- Page:      " + page() + "\n" +
+                    "-- scrollId:  " + scrollId() + "\n" +
                     "-- PageSize:  " + pageSize() + "\n" +
                     "-- TotalSize: " + totalSize() + "\n" +
-                    items().stream().map(Object::toString).map(s -> "-- "+s+"\n").collect(Collectors.joining());
+                    items().stream().map(Object::toString).map(s -> "-- " + s + "\n").collect(Collectors.joining());
         }
     }
 }

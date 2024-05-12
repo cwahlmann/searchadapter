@@ -285,17 +285,22 @@ image::images/ScrollIdToPagingWithCache.svg[]
 
 Mit dieser Vorgehensweise lässt sich die Lösung in Kapitel <<custom-filters>> auch auf APIs basierend auf Scroll-IDs übertragen.
 
-Eine Implementierung ist mehr oder weniger trivial.
+Eine Implementierung ist vergleichsweise simpel, da zwischen Input- und Output-Seiten
+eine 1:1-Beziehung besteht.
 
-Die Zuordnung von Input- zu Output-Seite ist 1:1, es muss lediglich ein Cache (Output-Seite -> Scroll-Id) statt
-(Output-Seite -> Input-Seite) verwendet werden.
+Es muss lediglich ein Cache (Output-Seite -> Scroll-Id) statt (Output-Seite -> Input-Seite) verwendet werden.
 Dieser arbeitet ähnlich wie der Index-Cache aus <<custom-filters>>.
 
 Auch hier sollten alle beim Iterieren gefundenen Scroll-Ids im Cache gespeichert werden, und bei der Suche nach einer
-Scroll-ID sollte bei der letzten bekannten Scroll-Id begonnen werden.
+Scroll-ID sollte bei der letzten bekannten Scroll-ID begonnen werden.
+
+Den Quellcode für den `SearchWithScrollIdAdapter` gibt es
+link:src/main/java/de/dreierschach/searchadapter/scollId/SearchWithScrollIdAdapter.java[hier],
+eine Test-Implementierung des Adapters findet sich
+link:src/test/java/de/dreierschach/searchadapter/scrollId/[in diesem Ordner].
 
 [[merge-responses]]
-== Ergebnisse mehrerer Suchen
+== Ergebnisse mehrerer Suchen zusammenführen
 
 Mangels geeigneter Suchkriterien kann es nötig sein, Ergebnisse aus mehreren Suchanfragen zusammenzuführen.
 
@@ -308,7 +313,7 @@ Die Ergebnisse der Einzelsuchen werden zu einer Liste mit doppelter Länge zusam
 .Simples Mergen ohne nachträgliches Filtern
 image::images/MergeResponsesSimple.svg[]
 
-=== In der Realität variable Seitenlängen
+=== Die Realität
 
 Dieser einfache Fall stellt leider einen Idealfall dar.
 In der Regel muss mit Einzelergebnissen mit variabler Länge gearbeitet werden.

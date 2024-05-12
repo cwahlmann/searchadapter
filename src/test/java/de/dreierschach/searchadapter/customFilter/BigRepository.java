@@ -22,10 +22,10 @@ public class BigRepository {
         this.requestCount = 0;
     }
 
-    public SearchResult<Item> search(Search search, long page, long pageSize) {
+    public SearchResult search(Search search, long page, long pageSize) {
         requestCount++;
         var result = items.stream().skip(page * pageSize).limit(pageSize).toList();
-        return new SearchResult<>(result, items.size(), page, pageSize);
+        return new SearchResult(result, items.size(), page, pageSize);
     }
 
     public void add(Item item) {
@@ -57,7 +57,7 @@ public class BigRepository {
         }
     }
 
-    public record SearchResult<T>(List<T> items, long totalSize, long page, long pageSize) {
+    public record SearchResult(List<Item> items, long totalSize, long page, long pageSize) {
         public String toString() {
             return "GeneralStore:" +
                     "-- Page:      " + page() + "\n" +

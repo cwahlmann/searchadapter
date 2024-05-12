@@ -49,8 +49,8 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
     /**
      * initialize caches for input-pages and indexes
      *
-     * @param inputCacheSize a cache for requests to the underlying repository
-     * @param indexCacheSize a cache for information, which pages to request when filling a result-page - this cache may be
+     * @param inputCacheSize the size of the cache for requests to the underlying repository
+     * @param indexCacheSize the size of the cache for information, which pages to request when filling a result-page - this cache may be
      *                       quite big, because it stores only two long values
      */
     public void enableCache(long inputCacheSize, long indexCacheSize) {
@@ -217,7 +217,7 @@ abstract public class SearchWithFilterAdapter<T, U, V> {
         long outputItemIndex = 0;
 
         // the current input-page
-        long inputPage = 0;
+        long inputPage = index.page();
 
         while (outputPage < search.page()) {
             // read next data from cache or repository
