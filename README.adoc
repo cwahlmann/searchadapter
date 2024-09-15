@@ -201,8 +201,8 @@ private Index cachedFindIndex(PagedSearchWithFilter<U, V> search) {
 ----
 <1> Die Kapazität des Index-Cache kann und sollte deutlich größer als die des Input-Caches gewählt werden.
 <2> Damit neben dem gesuchten Index weitere Indexe im Cache gespeichert werden können,
-darf nicht die Lamda-Funktion des Caches genutzt werden.  Änderungen des Cache
-da innerhalb dieser Lambda-Funktion sind nicht erlaubt.
+darf nicht die Lamda-Funktion des Caches genutzt werden.  Änderungen des Caches
+innerhalb dieser Lambda-Funktion sind nicht erlaubt.
 <3> Es wurde kein Eintrag zur gesuchten Seite gefunden. Ermittle den Index ausgehen vom letzten im Cache gespeicherten
 Index (siehe unten).
 
