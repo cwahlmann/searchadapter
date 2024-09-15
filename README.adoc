@@ -294,7 +294,7 @@ Dieser arbeitet ähnlich wie der Index-Cache aus <<custom-filters>>.
 Auch hier sollten alle beim Iterieren gefundenen Scroll-Ids im Cache gespeichert werden, und bei der Suche nach einer
 Scroll-ID sollte bei der letzten bekannten Scroll-ID begonnen werden.
 
-Den Quellcode für den `SearchWithScrollIdAdapter` gibt es
+Den Quellcode für den `SearchWithMergeAdapter` gibt es
 link:src/main/java/de/dreierschach/searchadapter/scollId/SearchWithScrollIdAdapter.java[hier],
 eine Test-Implementierung des Adapters findet sich
 link:src/test/java/de/dreierschach/searchadapter/scrollId/[in diesem Ordner].
@@ -389,6 +389,7 @@ Gegeben sind `n` Input-Methoden `M~1~ ... M~n~` mit jeweils einem `Index~n~` mit
 1. für jede Methode `M~i~ | i = 1 ... n`, die noch Daten bereitstellen kann:
 .. Lese die Daten und sortiere sie in der Ergebnisseite ein.
 .. Wird ein Element aus `M~j~` in die nächste Ergebnisseite verschoben: aktualisiere `Index~j~`, sodass er auf dieses Element zeigt.
+  Dazu muss sich der Algorithmus zum jeweiligen Element jeweils auch die Quell-Seitennummer und die Position innerhalt dieser Seite merken.
 .. Aktualisiere `Index~i~`.
 2. Prüfe, ob mindestens eine Methode `M~x~` potenziell weitere Daten zur Ergebnisseite beisteuern kann.
 .. Das ist der Fall, wenn die Daten der aktuell geladenen Seite von `M~x~` vollständig verarbeitet wurden, d.h. `Index~x~` verweist auf das erste Element der folgenden Seite, und mind. 1 weitere Seite zur Verfügung steht.
